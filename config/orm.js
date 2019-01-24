@@ -1,57 +1,74 @@
-Object Relational Mapper (ORM)
+var connection = require('../config/connection.js');
+function printQuestionMarks(num) {
+  var arr = [];
+  for (var i = 0; i < num; i++) {
+    arr.push('?');
+  }
+  return arr.toString();
+}
 
-// The ?? signs are for swapping out table or column names
-// The ? signs are for swapping out other values
-// These help avoid SQL injection
-// https://en.wikipedia.org/wiki/SQL_injection
+function objToSql(ob) {
+  //column1 =value, column2 =value2
+  var arr = [];
+
+  for (var key in ob) {
+    if (ob.hasOwnProperty(key)) {
+      arr.push(key + '= ' + ob[key]);
+    }
+  }
+  return arr.toString();
+}
+
 var orm = {
-  select: (whatToSelect, tableName) => {
-    const query = 'SELECT ?? FROM ??';
-    // SELECT party_name FROM parties;
-    // SELECT 'party_name' FROM 'parties';
-    
-    connection.query(query, [whatToSelect, tableName],
-      (err, result) => {
-          if(err) {
-            throw err;
-          }
-
-          console.log(result);
-      })
+  selectAll: function (tableInput, cb) {
+    var queryString = 'SELECT *FROM' + tableInput;
+    connection.query(queryString, function (err, result) {
+      if (err) throw err;
+      cb(result);
+    });
   },
-  selectWhere: (table, colToSearch, value) => {
-    const query = 'SELECT * FROM ?? WHERE ?? = ?';
 
-    connection.query(query, [table, colToSearch, value],
-      (err, result) => {
-          if(err) {
-            throw err;
-          }
+  //vals is an array of values that we want to save to cols
+  // cols are the columns we want to inster the values into
 
-          console.log(result);
-      })
+  insertOne: function (table, cols, vals, cb) {
+    var queryString = 'INSERT INTO' + table;
+    queryString = queryString + '(';
+    queryString = queryString + cols.toString();
+    queryString = queryString + ')';
+    queryString = queryString + 'Values (';
+    queryString = queryString + printQuestionMarks(vals.length);
+    queryString = queryString + ' )';
+
+    console.log(queryString);
+
+    connection.query(queryString, vals, function (err, result) {
+      if (err) throw err;
+      cb(result);
+    });
+
   },
-  // const whatToSelect = ['client_name', 'party_name'];
-  //orm.leftJoin(whatToSelect, 'clients', 'parties', 'id', 'client_id');
-  leftJoin: (whatToSelect, tableOne, tableTwo, onTableOneCol, onTableTwoCol) => {
-    const query = `
-      SELECT ??
-      FROM ?? AS tOne
-      LEFT JOIN ?? AS tTWo
-      ON tOne.?? = tTwo.??`
 
-    connection.query(query, [whatToSelect, tableOne, tableTwo, onTableOneCol, onTableTwoCol],
-      (err, result) => {
-        if(err){
-          throw err
-        }
+  // objColVals would be the column and values that you want to update
+  // and exaple of objColvVal would be {name:panter,sleepy:true}
+  updateOne: function (table, objColVals, condition, cb) {
+    var queryString = 'UPDATE ' + table;
 
-        console.log(result);
-      })
+    queryString = queryString + 'SET';
+    queryString = queryString + objToSql(objColVals);
+    queryString = queryString + 'WHERE';
+    queryString = queryString + CONDITION;
+
+    connection.query(queryString, function (err, result) {
+      if (err) throw err;
+      cb(result);
+    });
   }
 };
 
+
 module.exports = orm;
+ 
 
 
 
@@ -60,4 +77,4 @@ module.exports = orm;
 
 //  selectAll()
 //   insertOne()
-//      updateOne()
+//      updateOne()//

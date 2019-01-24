@@ -1,6 +1,8 @@
 
 // express import
 var express = require("express");
+var bodyParser = require('body-Parser');
+var methodOverride = require('method-override');
 
 
 var PORT = process.env.PORT || 3000;
@@ -11,9 +13,7 @@ var app = express();
 app.use(express.static(process.cwd() +"/public"));
 
 
-app.use(bodyParser.urlencoded({
-  extended:false
-}));
+app.use(bodyParser.urlencoded({extended:false}));
 
 // override with POST having ?_method =DELETE
 app.use(methodOverride('_method'));
@@ -30,7 +30,7 @@ app.set("view engine", "handlebars");
 //app.use(express.json());
 
 // Import routes and give the server access to them.
-var routes = require("./controllers/burger_Controller.js");
+var routes = require("./controllers/burgers_Controller.js");
 
 app.use(routes);
 // app.use('/', routes);

@@ -5,9 +5,13 @@ var burger = require("../models/burger.js");
 // Create the `router` for the app
 var router = express.Router();
 
+router.get('/', function(req, res) {
+    res.redirect('/burgers');
+});
+
 
 router.get('/burgers',function (req,res){
-    burgers.all(function(data){
+    burger.selectAll(function(data){
         var hbsObject = {burgers:data};
         console.log(hsObject);
         res.render('index',hbsObject);
@@ -15,16 +19,19 @@ router.get('/burgers',function (req,res){
 });
 
 router.post('/burgers/create',function(req,res){
-    burger.create(['burger_name','Tuna Burger'], [req.body.Burger_name,req.body.Tuna],function(){
+    burger.insertOne(req.body.burger_name, function() {
         res.redirect('/burgers');
     });
 });
 
 router.put ('burgers/update/:id',function(req, res){
-    var condition = 'id = ' + req.params.id;
+    burger.updateOne(req.params.id, function() {
+        res.redirect('/burgers');
 
-    console.log('condition',condition);
-    res.redirect('/burgers');
+    //var condition = 'id = ' + req.params.id;
+
+    //console.log('condition',condition);
+    }); 
     
 });
 
